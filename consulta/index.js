@@ -15,6 +15,12 @@ const funcoes = {
     const comentarios = baseConsulta[comentario.serieId]['comentarios']
     //cadastra o comentario na lista (push)
     comentarios.push(comentario)
+  },
+  ComentarioAtualizado: (comentario) => {
+    const comentarios = baseConsulta[comentario.serieId]['comentarios']
+    const indice = comentarios.findIndex(c => c.id === comentario.id)
+    //troca o comentario inteiro, sem examinar o que mudou
+    comentarios[indice] = comentario
   }
 }
 
