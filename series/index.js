@@ -26,7 +26,7 @@ app.get('/series', function(req, res){
 })
 
 //POST /series
-app.post('/series', (req, res) => {
+app.post('/series', async (req, res) => {
   // { titulo: "Ruptura", plataforma: "Apple TV" }
   const { titulo, plataforma } = req.body
   if (!titulo || !plataforma) {
@@ -39,7 +39,24 @@ app.post('/series', (req, res) => {
   }
   series[id] = serie
   id++
+  //emitir o evento de criação de série
+  await axios.post('http://localhost:10000/eventos', {
+    tipo: 'SerieCriada',
+    dados: serie
+  })
   res.status(201).json(serie)
+})
+
+//POST /eventos
+//exibir o tipo do evento no log
+//encerrar a requisição, não deixando o barramento esperando
+app.post('/eventos', (req, res) => {
+  try{
+    const evento = req.body
+    console.log(evento.tipo)
+  }
+  catch(e){}
+  res.end()
 })
 
 const port = 4000

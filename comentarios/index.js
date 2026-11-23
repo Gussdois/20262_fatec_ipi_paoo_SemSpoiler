@@ -21,7 +21,7 @@ app.use(express.json())
 const comentariosPorSerieId = {}
 
 //POST /series/1/comentarios
-app.post('/series/:id/comentarios', (req, res) => {
+app.post('/series/:id/comentarios', async (req, res) => {
   const idComentario = uuidv4()
   const { texto } = req.body
   const comentario = {
@@ -32,12 +32,27 @@ app.post('/series/:id/comentarios', (req, res) => {
   const comentariosDaSerie = comentariosPorSerieId[req.params.id] || []
   comentariosDaSerie.push(comentario)
   comentariosPorSerieId[req.params.id] = comentariosDaSerie
+  //emitir o evento de criação de comentário
+  await axios.post('http://localhost:10000/eventos', {
+    tipo: 'ComentarioCriado',
+    dados: comentario
+  })
   res.status(201).json(comentariosDaSerie)
 })
 
 //GET /series/1/comentarios
 app.get('/series/:id/comentarios', function(req, res){
   res.json(comentariosPorSerieId[req.params.id] || [])
+})
+
+//POST /eventos
+app.post('/eventos', (req, res) => {
+  try{
+    const evento = req.body
+    console.log(evento.tipo)
+  }
+  catch(e){}
+  res.end()
 })
 
 const port = 4100
