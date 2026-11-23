@@ -41,6 +41,32 @@ app.post('/eventos', (req, res) => {
 })
 
 const port = 4300
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Moderação. Porta ${port}.`)
+  try{
+    //buscar o histórico de eventos no barramento
+    const resp = await axios.get('http://localhost:10000/eventos')
+    //guardar o último evento de cada comentário, indexado pelo id do comentário
+    const ultimoEventoPorComentarioId = {}
+    resp.data.forEach((evento, indice, colecao) => {
+      if (evento.tipo === 'ComentarioCriado' ||
+          evento.tipo === 'ComentarioEditado' ||
+          evento.tipo === 'ComentarioModerado') {
+        ultimoEventoPorComentarioId[evento.dados.id] = evento
+      }
+    })
+    //moderar apenas os comentários que ficaram para trás
+    //se o último evento for ComentarioModerado, não há função no mapa e nada é feito
+    resp.data.forEach((evento, indice, colecao) => {
+      try{
+        if (ultimoEventoPorComentarioId[evento.dados.id] === evento) {
+          funcoes[evento.tipo](evento.dados)
+        }
+      }
+      catch(e){}
+    })
+  }
+  catch(e){
+    console.log('Barramento indisponível')
+  }
 })
