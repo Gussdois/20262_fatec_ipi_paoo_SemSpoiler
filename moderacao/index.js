@@ -9,20 +9,25 @@ app.use(express.json())
 //emitir um evento do tipo ComentarioModerado
 const palavrasProibidas = ["morre", "final", "assassino", "traidor"]
 
+const moderar = (comentario) => {
+  comentario.status =
+    palavrasProibidas.find(palavra => comentario.texto.includes(palavra)) ? 'spoiler' : 'liberado'
+  axios.post('http://localhost:10000/eventos', {
+    tipo: 'ComentarioModerado',
+    dados: {
+      id: comentario.id,
+      texto: comentario.texto,
+      serieId: comentario.serieId,
+      status: comentario.status
+    }
+  })
+}
+
+//ComentarioCriado e ComentarioEditado são tratados pela mesma função
+//nunca tratar ComentarioAtualizado, senão a moderação aconteceria para sempre
 const funcoes = {
-  ComentarioCriado: (comentario) => {
-    comentario.status =
-      palavrasProibidas.find(palavra => comentario.texto.includes(palavra)) ? 'spoiler' : 'liberado'
-    axios.post('http://localhost:10000/eventos', {
-      tipo: 'ComentarioModerado',
-      dados: {
-        id: comentario.id,
-        texto: comentario.texto,
-        serieId: comentario.serieId,
-        status: comentario.status
-      }
-    })
-  }
+  ComentarioCriado: moderar,
+  ComentarioEditado: moderar
 }
 
 app.post('/eventos', (req, res) => {
