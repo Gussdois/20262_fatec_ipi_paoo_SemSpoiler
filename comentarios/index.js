@@ -4,24 +4,9 @@ const { v4: uuidv4 } = require('uuid')
 const app = express()
 app.use(express.json())
 
-/*
-{
-  1: [
-    {
-      id: '596ec099-34cd-4ab8-ab70-2ee94ea8592a',
-      texto: 'Que abertura linda',
-      serieId: '1'
-    }
-  ],
-  2: [
-    {}
-  ]
-}
-*/
-const comentariosPorSerieId = {}
-
+const comentariosPorSerieId ={}
 const funcoes = {
-  ComentarioModerado: (comentario) => {
+  ComentarioModerado: (comentario) =>{
     const comentariosDaSerie = comentariosPorSerieId[comentario.serieId]
     const comentarioParaAtualizar = comentariosDaSerie.find(c => c.id === comentario.id)
     comentarioParaAtualizar.status = comentario.status
@@ -36,8 +21,6 @@ const funcoes = {
     })
   }
 }
-
-//POST /series/1/comentarios
 app.post('/series/:id/comentarios', async (req, res) => {
   const idComentario = uuidv4()
   const { texto } = req.body
@@ -50,7 +33,7 @@ app.post('/series/:id/comentarios', async (req, res) => {
   const comentariosDaSerie = comentariosPorSerieId[req.params.id] || []
   comentariosDaSerie.push(comentario)
   comentariosPorSerieId[req.params.id] = comentariosDaSerie
-  //emitir o evento de criação de comentário
+
   await axios.post('http://localhost:10000/eventos', {
     tipo: 'ComentarioCriado',
     dados: comentario
@@ -58,12 +41,9 @@ app.post('/series/:id/comentarios', async (req, res) => {
   res.status(201).json(comentariosDaSerie)
 })
 
-//GET /series/1/comentarios
 app.get('/series/:id/comentarios', function(req, res){
   res.json(comentariosPorSerieId[req.params.id] || [])
 })
-
-//PUT /series/1/comentarios/596ec099-34cd-4ab8-ab70-2ee94ea8592a
 app.put('/series/:id/comentarios/:idComentario', async (req, res) => {
   const { texto } = req.body
   const comentariosDaSerie = comentariosPorSerieId[req.params.id] || []
@@ -73,7 +53,6 @@ app.put('/series/:id/comentarios/:idComentario', async (req, res) => {
   }
   comentario.texto = texto
   comentario.status = 'pendente'
-  //emitir o evento de edição de comentário
   await axios.post('http://localhost:10000/eventos', {
     tipo: 'ComentarioEditado',
     dados: comentario
@@ -81,7 +60,6 @@ app.put('/series/:id/comentarios/:idComentario', async (req, res) => {
   res.status(200).json(comentario)
 })
 
-//POST /eventos
 app.post('/eventos', (req, res) => {
   try{
     const evento = req.body
@@ -91,6 +69,5 @@ app.post('/eventos', (req, res) => {
   catch(e){}
   res.end()
 })
-
 const port = 4100
 app.listen(port, () => console.log(`Comentários. Porta ${port}.`))
