@@ -2,37 +2,27 @@ const axios = require('axios')
 const express = require('express')
 const app = express()
 app.use(express.json())
-
 const baseConsulta = {}
-
 const atualizarComentario = (comentario) => {
   const comentarios = baseConsulta[comentario.serieId]['comentarios']
   const indice = comentarios.findIndex(c => c.id === comentario.id)
-  //troca o comentario inteiro, sem examinar o que mudou
   comentarios[indice] = comentario
 }
-
-const funcoes = {
+const funcoes ={
   SerieCriada: (serie) => {
     baseConsulta[serie.id] = serie
     baseConsulta[serie.id]['comentarios'] = []
   },
   ComentarioCriado: (comentario) => {
-    //pegar a lista de comentarios da serie a que esse comentario recebido pertence
     const comentarios = baseConsulta[comentario.serieId]['comentarios']
-    //cadastra o comentario na lista (push)
     comentarios.push(comentario)
   },
   ComentarioAtualizado: atualizarComentario,
   ComentarioEditado: atualizarComentario
 }
-
-//GET /series
 app.get('/series', (req, res) => {
   res.json(baseConsulta)
 })
-
-//GET /series/1
 app.get('/series/:id', (req, res) => {
   const serie = baseConsulta[req.params.id]
   if (!serie) {
@@ -40,8 +30,6 @@ app.get('/series/:id', (req, res) => {
   }
   res.json(serie)
 })
-
-//POST /eventos
 app.post('/eventos', function(req, res){
   try{
     const evento = req.body
@@ -51,12 +39,10 @@ app.post('/eventos', function(req, res){
   catch(e){}
   res.end()
 })
-
 const port = 4200
 app.listen(port, async () => {
   console.log(`Consulta. Porta ${port}.`)
   try{
-    //buscar o histórico de eventos no barramento
     const resp = await axios.get('http://localhost:10000/eventos')
     resp.data.forEach((evento, indice, colecao) => {
       try{
