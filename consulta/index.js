@@ -1,3 +1,4 @@
+const HOST = 'localhost'
 const axios = require('axios')
 const express = require('express')
 const app = express()
@@ -43,7 +44,7 @@ const port = 4200
 app.listen(port, async () => {
   console.log(`Consulta. Porta ${port}.`)
   try{
-    const resp = await axios.get('http://localhost:10000/eventos')
+    const resp = await axios.get(`http://${HOST}:10000/eventos`)
     resp.data.forEach((evento, indice, colecao) => {
       try{
         funcoes[evento.tipo](evento.dados)

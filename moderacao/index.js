@@ -1,3 +1,4 @@
+const HOST = 'localhost'
 const axios = require('axios')
 const express = require('express')
 const app = express()
@@ -8,7 +9,7 @@ const palavrasProibidas = ["morre", "final", "assassino", "traidor"]
 const moderar = (comentario) =>{
   comentario.status =
     palavrasProibidas.find(palavra => comentario.texto.includes(palavra)) ? 'spoiler' : 'liberado'
-  axios.post('http://localhost:10000/eventos', {
+  axios.post(`http://${HOST}:10000/eventos`, {
     tipo: 'ComentarioModerado',
     dados: {
       id: comentario.id,
@@ -37,7 +38,7 @@ const port = 4300
 app.listen(port, async () =>{
   console.log(`Moderação. Porta ${port}.`)
   try{
-    const resp = await axios.get('http://localhost:10000/eventos')
+    const resp = await axios.get(`http://${HOST}:10000/eventos`)
     const ultimoEventoPorComentarioId = {}
     resp.data.forEach((evento, indice, colecao) => {
       if (evento.tipo === 'ComentarioCriado' ||
